@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  vgtpbx-eslserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: vgtpbx-eslserver:latest
+    container_name: vgtpbx-eslserver
+    network_mode: "host"
+    environment:
+      - FREESWITCH_HOST=127.0.0.1
+      - FREESWITCH_ESL_PORT=8021
+      - FREESWITCH_ESL_PASSWORD=ClueCon
+      - NODE_ENV=production
+    restart: unless-stopped
