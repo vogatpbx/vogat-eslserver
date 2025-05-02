@@ -1,5 +1,14 @@
-import type { FreeSwitchEventData } from 'esl-lite';
-import { logger } from '../utils/logger';
+import type { FreeSwitchEventData } from 'esl-lite'
+import { logger } from '../utils/logger'
+import { eventToVgtPbx } from '../api/eventhandler/route'
+
+interface CustomEventData {
+    eventName: string
+    eventSubclass: any
+    uuid?: string
+    data: any
+    timestamp: string
+}
 
 export function handleAllEvents(data: FreeSwitchEventData) {
     const eventName = data.headers.get('Event-Name') || 'Unknown';
@@ -17,7 +26,14 @@ export function handleChannelCreate(data: FreeSwitchEventData) {
 export function handleChannelAnswer(data: FreeSwitchEventData) {
     const uuid = data.body.uniqueID
     const body = data.body
-    logger.info({ body }, 'Channel answered');
+    const eventName =  data.body.eventName || 'Unknown';
+    logger.info({ body }, 'Channel answered')
+    eventToVgtPbx(eventName, {
+        eventName,
+        channelData: body,
+        rawEventData: data,
+        timestamp: new Date().toISOString(),
+    })
 }
 
 export function handleChannelExecute(data: FreeSwitchEventData) {
@@ -27,7 +43,14 @@ export function handleChannelExecute(data: FreeSwitchEventData) {
 
 export function handleChannelHangup(data: FreeSwitchEventData) {
     const body = data.body
+    const eventName =  data.body.eventName || 'Unknown';
     logger.info({ body }, 'Channel Hangup');
+    eventToVgtPbx(eventName, {
+        eventName,
+        channelData: body,
+        rawEventData: data,
+        timestamp: new Date().toISOString(),
+    })
 }
 
 export function handleChannelDestroy(data: FreeSwitchEventData) {
@@ -103,4 +126,71 @@ export function handleApiResponse(data: FreeSwitchEventData) {
 export function handleRequestParams(data: FreeSwitchEventData) {
     const body = data
     logger.info({body}, 'Request params');
+}
+
+
+
+
+export function handleCustomEvent(data: FreeSwitchEventData) {
+    const eventName =  data.body.eventName || 'Unknown';
+    const eventSubclass = data.body.data['Event-Subclass'] || 'unknown'
+
+    const customEventData: CustomEventData = {
+        eventName,
+        eventSubclass,
+        data: {
+            ...data.body,
+            headers: data.headers,
+        },
+        timestamp: new Date().toISOString(),
+    };
+
+    logger.debug({
+        eventName,
+        eventSubclass,
+        customEventData,
+    }, 'Custom event received');
+
+    switch (eventSubclass) {
+        case 'sofia::register':
+            logger.info('Sofia register event');
+            break;
+        case 'sofia::unregister':
+            logger.info('Sofia unregister event');
+            break;
+        default:
+            logger.info('Unknown custom event subclass');
+            break;
+
+    }
+}
+
+
+export function handleSofiaRegister(data: FreeSwitchEventData) {
+    const registrationData = {
+        profile: data.body.data['profile-name'],
+        fromUser: data.body.data['from-user'],
+        fromHost: data.body.data['from-host'],
+        contact: data.body.data['contact'],
+        context: data.body.data['user_context'],
+        domain: data.body.data['domain_name'],
+        username: data.body.data['user_name'],
+        sip_number_alias: data.body.data['sip_number_alias'],
+        sip_auth_username: data.body.data['sip_auth_username'],
+        network_ip: data.body.data['network-ip'],
+    }
+
+    logger.info({ 
+        subClass: data.body.data['Event-Subclass'],
+        registration: registrationData 
+    }, 'Sofia register');
+
+    eventToVgtPbx('CUSTOM', {
+        eventName: 'CUSTOM',
+        subClass: 'sofia::register',
+        sofiaData: registrationData,
+        rawEventData: data,
+        timestamp: new Date().toISOString(),
+    })
+
 }

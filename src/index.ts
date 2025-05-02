@@ -1,6 +1,6 @@
 import { FreeSwitchClient, FreeSwitchEventData } from 'esl-lite'
 import { createServer } from 'http';
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction } from 'express'
 import { config } from './lib/config'
 import { logNetworkAddresses, getNetworkAddresses } from './lib/network'
 import { logger } from './utils/logger'
@@ -23,7 +23,8 @@ import {
   handleChannelCallState,
   handleChannelState,
   handleChannelExecute,
-  handleRequestParams
+  handleRequestParams,
+  handleSofiaRegister,
 } from './handlers/eventHandlers';
 
 const app = express();
@@ -100,6 +101,12 @@ async function connectToEsl() {
   eslClient.on('CHANNEL_CALLSTATE', handleChannelCallState);
   eslClient.on('CHANNEL_STATE', handleChannelState);
   eslClient.on('CHANNEL_EXECUTE', handleChannelExecute);
+
+  //sofia events
+
+  eslClient.custom.on('sofia::register', handleSofiaRegister);
+  //eslClient.custom.on('sofia::unregister', handleSofiaUnregister);
+  //eslClient.custom.on('sofia::expire', handleSofiaExpire);
 
   //background API events
   eslClient.on('BACKGROUND_JOB', handleBackgroundJob);
