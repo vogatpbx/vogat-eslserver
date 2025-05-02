@@ -10,23 +10,30 @@ export function handleAllEvents(data: FreeSwitchEventData) {
 
 export function handleChannelCreate(data: FreeSwitchEventData) {
     const uuid = data.body.uniqueID
-    logger.info({ uuid }, 'New channel created');
+    const body = data.body
+    logger.info({ body }, 'New channel created - data');
 }
 
 export function handleChannelAnswer(data: FreeSwitchEventData) {
     const uuid = data.body.uniqueID
-    logger.info({ uuid }, 'Channel answered');
+    const body = data.body
+    logger.info({ body }, 'Channel answered');
+}
+
+export function handleChannelExecute(data: FreeSwitchEventData) {
+    const body = data.body
+    logger.info({body}, 'Channel Execute');
 }
 
 export function handleChannelHangup(data: FreeSwitchEventData) {
-    const uuid = data.body.uniqueID
-    const cause = data.headers.get('Hangup-Cause');
-    logger.info({ uuid, cause }, 'Channel hangup');
+    const body = data.body
+    logger.info({ body }, 'Channel Hangup');
 }
 
 export function handleChannelDestroy(data: FreeSwitchEventData) {
     const uuid = data.body.uniqueID
-    logger.info({ uuid }, 'Channel destroyed');
+    const body = data
+    logger.info({ body }, 'Channel Destroyed - data');
 }
 
 export function handleChannelBridge(data: FreeSwitchEventData) {
@@ -34,6 +41,17 @@ export function handleChannelBridge(data: FreeSwitchEventData) {
     const otherLeg = data.headers.get('Other-Leg-Unique-ID');
     logger.info({ uuid, otherLeg }, 'Channel bridged');
 }
+
+export function handleChannelCallState(data: FreeSwitchEventData) {
+    const body = data.body
+    logger.info({body}, 'Channel Call State');
+}
+
+export function handleChannelState(data: FreeSwitchEventData) {
+    const body = data.body
+    logger.info({body}, 'Channel State');
+}
+
 
 export function handleChannelUnbridge(data: FreeSwitchEventData) {
     const uuid = data.body.uniqueID
@@ -70,4 +88,19 @@ export function handleStartup(data: FreeSwitchEventData) {
 export function handleReloadXml(data: FreeSwitchEventData) {
     const body = data.body.data
     logger.info({body}, 'Reload XML');
+}
+
+export function handleBackgroundJob(data: FreeSwitchEventData) {
+    const body = data.body.data
+    logger.info({body}, 'Background job');
+}
+
+export function handleApiResponse(data: FreeSwitchEventData) {
+    const body = data.body.data
+    logger.info({body}, 'API response');
+}
+
+export function handleRequestParams(data: FreeSwitchEventData) {
+    const body = data
+    logger.info({body}, 'Request params');
 }
