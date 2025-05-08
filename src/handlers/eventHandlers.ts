@@ -10,6 +10,8 @@ interface CustomEventData {
     timestamp: string
 }
 
+
+
 export function handleAllEvents(data: FreeSwitchEventData) {
     const eventName = data.headers.get('Event-Name') || 'Unknown';
     const uuid = data.headers.get('Unique-ID') || 'Unknown';
@@ -39,6 +41,11 @@ export function handleChannelAnswer(data: FreeSwitchEventData) {
 export function handleChannelExecute(data: FreeSwitchEventData) {
     const body = data.body
     logger.info({body}, 'Channel Execute');
+}
+
+export function handleChannelExecuteComplete(data: FreeSwitchEventData) {
+    const body = data.body
+    logger.info({body}, 'Channel Execute Complete');
 }
 
 export function handleChannelHangup(data: FreeSwitchEventData) {
@@ -124,8 +131,19 @@ export function handleApiResponse(data: FreeSwitchEventData) {
 }
 
 export function handleRequestParams(data: FreeSwitchEventData) {
-    const body = data
-    logger.info({body}, 'Request params');
+    const uid = data.body.uniqueID
+    const body = data.body.data
+    logger.info({uid}, 'Request params');
+}
+
+export function handleRecvMessage(data: FreeSwitchEventData) {
+    const body = data.body.data
+    logger.info({body}, 'Recv message');
+}
+
+export function handleCallDetail(data: FreeSwitchEventData) {
+    const body = data.body.data
+    logger.info({body}, 'call detail');
 }
 
 
